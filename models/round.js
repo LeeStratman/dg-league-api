@@ -5,7 +5,7 @@ const roundSchema = new mongoose.Schema({
   scorecard: { type: mongoose.Types.ObjectId },
   course: { type: mongoose.Types.ObjectId },
   scores: [{ type: Number }],
-  date: { type: Date },
+  date: { type: Date, default: Date.now() },
 });
 
 const Round = mongoose.model("Round", roundSchema);
