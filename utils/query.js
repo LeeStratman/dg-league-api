@@ -6,6 +6,10 @@ const getAll = async (model) => {
   return model.find({}).exec();
 };
 
+const getAllWith = async (model, fields) => {
+  return model.find(fields).exec();
+};
+
 const createOne = async (model, fields) => {
   return model.create({ ...fields });
 };
@@ -25,6 +29,7 @@ const removeOne = async (model, id) => {
 module.exports = {
   getOne,
   getAll,
+  getAllWith,
   createOne,
   updateOne,
   removeOne,

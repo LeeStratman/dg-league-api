@@ -10,4 +10,6 @@ router
   .put(playerController.updateOne)
   .delete(playerController.removeOne);
 
+router.route("/:id/rounds").get(playerController.getAllRounds);
+
 module.exports = router;

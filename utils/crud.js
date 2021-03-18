@@ -28,6 +28,16 @@ const getAll = (model) => async (req, res, next) => {
   }
 };
 
+const getAllWith = (model) => (property) => async (req, res, next) => {
+  try {
+    const result = await query.getAllWith(model, { [property]: req.params.id });
+
+    return res.status(200).json(result);
+  } catch (err) {
+    return next(err);
+  }
+};
+
 const createOne = (model) => async (req, res, next) => {
   try {
     const result = await query.createOne(model, req.body);
@@ -75,5 +85,6 @@ module.exports = (model) => ({
   updateOne: updateOne(model),
   getAll: getAll(model),
   getOne: getOne(model),
+  getAllWith: getAllWith(model),
   createOne: createOne(model),
 });
