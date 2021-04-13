@@ -9,7 +9,7 @@ const router = Router();
 
 router
   .route("/")
-  .get(leagueController.getAll)
+  .get(leagueController.getLeagues)
   .post(
     [validateLeague, validateLeagueOrganizer, validateLeagueName],
     leagueController.createOne
