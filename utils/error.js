@@ -5,10 +5,10 @@ class BadRequestError {
   }
 }
 
-class UserExistsError {
-  constructor() {
+class ResourceExistsError {
+  constructor(resource = "Resource") {
     this.status = 404;
-    this.message = "User does not exist.";
+    this.message = `${resource} does not exist.`;
   }
 }
 
@@ -19,8 +19,16 @@ class UniquePropertyError {
   }
 }
 
+class ServerError {
+  constructor(err) {
+    this.status = 500;
+    this.message = `Server Error: ${err}`;
+  }
+}
+
 module.exports = {
   BadRequestError,
-  UserExistsError,
+  ResourceExistsError,
   UniquePropertyError,
+  ServerError,
 };

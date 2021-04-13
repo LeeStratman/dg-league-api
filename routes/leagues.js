@@ -21,4 +21,6 @@ router
   .put(leagueController.updateOne)
   .delete(leagueController.removeOne);
 
+router.route("/:id/users/:userId").put(leagueController.addUserToLeague);
+
 module.exports = router;

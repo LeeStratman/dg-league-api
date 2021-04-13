@@ -4,7 +4,7 @@ const {
   UserExistsError,
   UniquePropertyError,
 } = require("../utils/error");
-const { validateOrganizer, validateName } = require("../utils/league");
+const { validateUserId, validateName } = require("../utils/league");
 
 const validateUser = (req, res, next) => {
   const schema = Joi.object({
@@ -40,7 +40,7 @@ const validateLeagueOrganizer = async (req, res, next) => {
 
   if (!organizer) next(new BadRequestError());
 
-  const valid = await validateOrganizer(organizer);
+  const valid = await validateUserId(organizer);
 
   if (!valid) next(new UserExistsError());
 
