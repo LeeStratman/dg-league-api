@@ -2,7 +2,7 @@ const connectDB = require("./utils/db");
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const players = require("./routes/players");
+const users = require("./routes/users");
 const courses = require("./routes/courses");
 const rounds = require("./routes/rounds");
 
@@ -10,7 +10,7 @@ connectDB();
 
 app.use(express.json());
 app.use(cors());
-app.use("/api/players", players);
+app.use("/api/users", users);
 app.use("/api/courses", courses);
 app.use("/api/rounds", rounds);
 

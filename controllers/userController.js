@@ -1,8 +1,8 @@
-const Player = require("../models/player");
+const User = require("../models/user");
 const crudController = require("../utils/crud");
 const { getAllWith } = require("./roundController");
 
 module.exports = {
-  ...crudController(Player),
-  getAllRounds: getAllWith("player"),
+  ...crudController(User),
+  getAllRounds: getAllWith("user"),
 };
