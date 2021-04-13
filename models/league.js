@@ -1,9 +1,12 @@
 const mongoose = require("mongoose");
 
 const leagueSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  organizer: { type: mongoose.Types.ObjectId },
-  users: [{ type: mongoose.Types.ObjectId }],
+  public: { type: Boolean, default: true },
+  name: { type: String, required: true, minlength: 3 },
+  organizer: { type: mongoose.Types.ObjectId, ref: "User" },
+  users: [{ type: mongoose.Types.ObjectId, ref: "User" }],
+  regDeadline: { type: Date },
+  layouts: [{ type: mongoose.Types.ObjectId, ref: "Layout" }],
 });
 
 const League = mongoose.model("League", leagueSchema);
