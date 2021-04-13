@@ -1,3 +1,4 @@
+const League = require("../models/league");
 const { userExists } = require("./user");
 
 const validateOrganizer = async (id) => {
@@ -5,7 +6,9 @@ const validateOrganizer = async (id) => {
 };
 
 const validateName = async (name) => {
-  return await !userExists({ name: name });
+  const exists = await League.exists({ name });
+
+  return !exists;
 };
 
 module.exports = { validateOrganizer, validateName };
