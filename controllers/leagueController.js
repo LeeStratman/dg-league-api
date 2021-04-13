@@ -11,7 +11,9 @@ const getLeagues = async (req, res, next) => {
     leagues = await League.find({
       public: true,
       name: { $regex: req.query.name.trim(), $options: "i" },
-    });
+    })
+      .select("-users")
+      .populate("organizer", "-_id -__v -password -registered");
   } else {
     leagues = leagueCRUD.getAll(req, res, next);
   }
