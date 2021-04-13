@@ -15,8 +15,13 @@ const getUserLeagues = async (id) => {
   return await League.find({ users: id });
 };
 
+const getLeagueWithUsers = async (id) => {
+  return await League.find({ _id: id }).populate("users", "-password");
+};
+
 module.exports = {
   validateUserId,
   validateName,
   getUserLeagues,
+  getLeagueWithUsers,
 };

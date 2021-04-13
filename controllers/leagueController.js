@@ -33,8 +33,6 @@ const addUserToLeague = async (req, res, next) => {
 
     if (!league) return next(new ResourceExistsError("League"));
 
-    console.log(league.users);
-
     if (league.users.includes(userId))
       return res
         .status(400)
