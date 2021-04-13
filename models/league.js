@@ -7,6 +7,7 @@ const leagueSchema = new mongoose.Schema({
   users: [{ type: mongoose.Types.ObjectId, ref: "User" }],
   regDeadline: { type: Date },
   layouts: [{ type: mongoose.Types.ObjectId, ref: "Layout" }],
+  createdDate: { type: Date, default: Date.now() },
 });
 
 const League = mongoose.model("League", leagueSchema);
