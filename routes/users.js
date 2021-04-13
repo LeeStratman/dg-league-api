@@ -14,6 +14,6 @@ router
   .put(userController.updateOne)
   .delete(userController.removeOne);
 
-router.route("/:id/rounds").get(userController.getAllRounds);
+router.route("/:id/leagues").get(userController.getLeagues);
 
 module.exports = router;
