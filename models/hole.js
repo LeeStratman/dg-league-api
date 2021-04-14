@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
-const Layout = require("./layout");
 
 const holeSchema = new mongoose.Schema({
-  number: { type: Number, required: true },
-  layouts: [Layout.schema],
+  course_number: { type: Number, required: true },
+  layout_number: { type: Number, required: true },
+  distance: { type: Number, required: true },
+  par: { type: Number, required: true },
+  notes: { type: String },
 });
 
 const Hole = mongoose.model("Hole", holeSchema);
