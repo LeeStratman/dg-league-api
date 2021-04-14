@@ -23,4 +23,6 @@ router
 
 router.route("/:id/users/:userId").put(leagueController.addUserToLeague);
 
+router.route("/:id/layouts/:layoutId").put(leagueController.updateLayout);
+
 module.exports = router;

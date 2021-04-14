@@ -44,8 +44,30 @@ const addUserToLeague = async (req, res, next) => {
 
     return res.status(200).send(updatedLeague);
   } catch (err) {
-    next(new ServerError());
+    next(new ServerError(err));
   }
 };
 
-module.exports = { ...leagueCRUD, getLeagues, addUserToLeague };
+const updateLayout = async (req, res, next) => {
+  const { id, layoutId } = req.params;
+
+  try {
+    let league = await League.findById(id);
+
+    if (!league) return next(new ResourceExistsError("League"));
+
+    const layout = league.layouts.id(layoutId);
+
+    Object.keys(req.body).forEach((key) => {
+      layout[key] = req.body[key];
+    });
+
+    league = await league.save();
+
+    return res.status(200).send(league);
+  } catch (err) {
+    next(new ServerError(err));
+  }
+};
+
+module.exports = { ...leagueCRUD, getLeagues, addUserToLeague, updateLayout };
