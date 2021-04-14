@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Layout = require("../models/layout");
 
 const leagueSchema = new mongoose.Schema({
   public: { type: Boolean, default: true },
@@ -6,7 +7,7 @@ const leagueSchema = new mongoose.Schema({
   organizer: { type: mongoose.Types.ObjectId, ref: "User" },
   users: [{ type: mongoose.Types.ObjectId, ref: "User" }],
   regDeadline: { type: Date },
-  layouts: [{ type: mongoose.Types.ObjectId, ref: "Layout" }],
+  layouts: [Layout.schema],
   createdDate: { type: Date, default: Date.now() },
 });
 
