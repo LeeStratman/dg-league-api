@@ -2,12 +2,8 @@ const courseController = require("../controllers/courseController");
 const { Router } = require("express");
 const router = Router();
 
-router.route("/").get(courseController.getAll).post(courseController.createOne);
+router.route("/").get(courseController.getAll);
 
-router
-  .route("/:id")
-  .get(courseController.getOne)
-  .put(courseController.updateOne)
-  .delete(courseController.removeOne);
+router.route("/:id").get(courseController.getOne);
 
 module.exports = router;
