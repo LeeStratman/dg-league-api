@@ -1,8 +1,11 @@
 const mongoose = require("mongoose");
+const Score = require("../models/score");
 
 const scorecardSchema = new mongoose.Schema({
-  type: { type: String },
-  league: { type: mongoose.Types.ObjectId },
+  date: { type: Date, required: true },
+  createdDate: { type: Date, default: Date.now() },
+  scores: [Score.schema],
+  complete: { type: Boolean, default: false },
 });
 
 const Scorecard = mongoose.model("Scorecard", scorecardSchema);
