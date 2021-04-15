@@ -35,4 +35,9 @@ router
   .route("/:id/events/:eventId/scorecard/:scorecardId")
   .post(leagueController.addScore);
 
+router
+  .route("/:id/events/:eventId/scorecard/:scorecardId/score/:scoreId")
+  .put(leagueController.updateScore)
+  .delete(leagueController.deleteScore);
+
 module.exports = router;

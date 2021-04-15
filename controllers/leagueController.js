@@ -134,8 +134,70 @@ const addScore = async (req, res, next) => {
     if (!scorecard) return next(new ResourceExistsError("Scorecard"));
 
     const score = new Score({ ...req.body });
-    console.log("score", score);
+
     scorecard.scores.push(score);
+
+    league = await league.save();
+
+    res.status(200).send(league);
+  } catch (err) {
+    next(new ServerError(err));
+  }
+};
+
+const updateScore = async (req, res, next) => {
+  const { id, eventId, scorecardId, scoreId } = req.params;
+
+  try {
+    let league = await League.findById(id);
+
+    if (!league) return next(new ResourceExistsError("League"));
+
+    const event = league.events.id(eventId);
+
+    if (!event) return next(new ResourceExistsError("Event"));
+
+    const scorecard = event.scorecards.id(scorecardId);
+
+    if (!scorecard) return next(new ResourceExistsError("Scorecard"));
+
+    const score = scorecard.scores.id(scoreId);
+
+    if (!score) return next(new ResourceExistsError("Score"));
+
+    Object.keys(req.body).forEach((key) => {
+      score[key] = req.body[key];
+    });
+
+    league = await league.save();
+
+    res.status(200).send(league);
+  } catch (err) {
+    next(new ServerError(err));
+  }
+};
+
+const deleteScore = async (req, res, next) => {
+  const { id, eventId, scorecardId, scoreId } = req.params;
+
+  try {
+    let league = await League.findById(id);
+
+    if (!league) return next(new ResourceExistsError("League"));
+
+    const event = league.events.id(eventId);
+
+    if (!event) return next(new ResourceExistsError("Event"));
+
+    const scorecard = event.scorecards.id(scorecardId);
+
+    if (!scorecard) return next(new ResourceExistsError("Scorecard"));
+
+    const score = scorecard.scores.id(scoreId);
+
+    if (!score) return next(new ResourceExistsError("Score"));
+
+    score.remove();
 
     league = await league.save();
 
@@ -153,4 +215,6 @@ module.exports = {
   createEvent,
   createScorecard,
   addScore,
+  updateScore,
+  deleteScore,
 };
