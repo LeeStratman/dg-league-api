@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Layout = require("../models/layout");
+const Event = require("../models/event");
 
 const leagueSchema = new mongoose.Schema({
   public: { type: Boolean, default: true },
@@ -9,6 +10,7 @@ const leagueSchema = new mongoose.Schema({
   regDeadline: { type: Date },
   layouts: [Layout.schema],
   createdDate: { type: Date, default: Date.now() },
+  events: [Event.schema],
 });
 
 const League = mongoose.model("League", leagueSchema);
