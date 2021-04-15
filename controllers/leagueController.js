@@ -2,6 +2,7 @@ const League = require("../models/league");
 const Event = require("../models/event");
 const Scorecard = require("../models/scorecard");
 const Score = require("../models/score");
+const Result = require("../models/result");
 const crudController = require("../utils/crud");
 const { validateUserId } = require("../utils/league");
 const { ResourceExistsError, ServerError } = require("../utils/error");
@@ -207,6 +208,58 @@ const deleteScore = async (req, res, next) => {
   }
 };
 
+const getEvent = async (req, res, next) => {
+  const { id, eventId } = req.params;
+
+  try {
+    const league = await League.findById(id);
+
+    if (!league) return next(new ResourceExistsError("League"));
+
+    const event = league.events.id(eventId);
+
+    if (!event) return next(new ResourceExistsError("Event"));
+
+    res.status(200).send(event);
+  } catch (err) {
+    next(new ServerError(err));
+  }
+};
+
+const calculateResults = async (req, res, next) => {
+  const { id, eventId } = req.params;
+
+  try {
+    let league = await League.findById(id);
+
+    if (!league) return next(new ResourceExistsError("League"));
+
+    const event = league.events.id(eventId);
+
+    if (!event) return next(new ResourceExistsError("Event"));
+
+    const results = event.scorecards
+      .map((scorecard) => scorecard.scores)
+      .flat()
+      .map((score) => {
+        return new Result({
+          player: score.player,
+          result: score.holes.reduce((acc, hole) => acc + hole),
+        });
+      });
+
+    event.results = results;
+
+    event.calculatedDate = Date.now();
+
+    league = await league.save();
+
+    res.status(200).send(league);
+  } catch (err) {
+    next(new ServerError(err));
+  }
+};
+
 module.exports = {
   ...leagueCRUD,
   getLeagues,
@@ -217,4 +270,6 @@ module.exports = {
   addScore,
   updateScore,
   deleteScore,
+  calculateResults,
+  getEvent,
 };

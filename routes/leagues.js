@@ -27,6 +27,8 @@ router.route("/:id/layouts/:layoutId").put(leagueController.updateLayout);
 
 router.route("/:id/events").post(leagueController.createEvent);
 
+router.route("/:id/events/:eventId").get(leagueController.getEvent);
+
 router
   .route("/:id/events/:eventId/scorecard")
   .post(leagueController.createScorecard);
@@ -39,5 +41,9 @@ router
   .route("/:id/events/:eventId/scorecard/:scorecardId/score/:scoreId")
   .put(leagueController.updateScore)
   .delete(leagueController.deleteScore);
+
+router
+  .route("/:id/events/:eventId/results")
+  .post(leagueController.calculateResults);
 
 module.exports = router;
