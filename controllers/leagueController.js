@@ -1,4 +1,7 @@
 const League = require("../models/league");
+const Event = require("../models/event");
+const Scorecard = require("../models/scorecard");
+const Score = require("../models/score");
 const crudController = require("../utils/crud");
 const { validateUserId } = require("../utils/league");
 const { ResourceExistsError, ServerError } = require("../utils/error");
@@ -70,4 +73,84 @@ const updateLayout = async (req, res, next) => {
   }
 };
 
-module.exports = { ...leagueCRUD, getLeagues, addUserToLeague, updateLayout };
+const createEvent = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    let league = await League.findById(id);
+
+    if (!league) return next(new ResourceExistsError("League"));
+
+    const event = new Event({ ...req.body });
+
+    league.events.push(event);
+
+    league = await league.save();
+
+    res.status(200).send(league);
+  } catch (err) {
+    next(new ServerError(err));
+  }
+};
+
+const createScorecard = async (req, res, next) => {
+  const { id, eventId } = req.params;
+
+  try {
+    let league = await League.findById(id);
+
+    if (!league) return next(new ResourceExistsError("League"));
+
+    const event = league.events.id(eventId);
+
+    if (!event) return next(new ResourceExistsError("Event"));
+
+    const scorecard = new Scorecard({ ...req.body });
+
+    event.scorecards.push(scorecard);
+
+    league = await league.save();
+
+    res.status(200).send(league);
+  } catch (err) {
+    next(new ServerError(err));
+  }
+};
+
+const addScore = async (req, res, next) => {
+  const { id, eventId, scorecardId } = req.params;
+
+  try {
+    let league = await League.findById(id);
+
+    if (!league) return next(new ResourceExistsError("League"));
+
+    const event = league.events.id(eventId);
+
+    if (!event) return next(new ResourceExistsError("Event"));
+
+    const scorecard = event.scorecards.id(scorecardId);
+
+    if (!scorecard) return next(new ResourceExistsError("Scorecard"));
+
+    const score = new Score({ ...req.body });
+    console.log("score", score);
+    scorecard.scores.push(score);
+
+    league = await league.save();
+
+    res.status(200).send(league);
+  } catch (err) {
+    next(new ServerError(err));
+  }
+};
+
+module.exports = {
+  ...leagueCRUD,
+  getLeagues,
+  addUserToLeague,
+  updateLayout,
+  createEvent,
+  createScorecard,
+  addScore,
+};
