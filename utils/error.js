@@ -40,6 +40,13 @@ class CredentialsError {
   }
 }
 
+class AuthorizationError {
+  constructor() {
+    this.status = 401;
+    this.message = "You are not authorized.";
+  }
+}
+
 class RequiredFieldsError {
   constructor(message) {
     this.status = 400;
@@ -55,4 +62,5 @@ module.exports = {
   UserExistsError,
   CredentialsError,
   RequiredFieldsError,
+  AuthorizationError,
 };
