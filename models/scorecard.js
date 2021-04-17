@@ -10,7 +10,6 @@ const scorecardSchema = new mongoose.Schema({
     default: "pending",
     enum: ["pending", "complete", "incomplete"],
   },
-  layout: { type: mongoose.Types.ObjectId, required: true, ref: "Layout" },
 });
 
 const Scorecard = mongoose.model("Scorecard", scorecardSchema);
