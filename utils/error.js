@@ -26,9 +26,17 @@ class ServerError {
   }
 }
 
+class UserExistsError {
+  constructor() {
+    this.status = 402;
+    this.message = `User already exists.`;
+  }
+}
+
 module.exports = {
   BadRequestError,
   ResourceExistsError,
   UniquePropertyError,
   ServerError,
+  UserExistsError,
 };
