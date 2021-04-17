@@ -8,6 +8,7 @@ const layoutSchema = new mongoose.Schema({
   source: { type: String },
   courseId: { type: String, required: true },
   holes: [Hole.schema],
+  public: { type: Boolean, default: false },
 });
 
 const Layout = mongoose.model("Layout", layoutSchema);
