@@ -20,7 +20,7 @@ const getLeague = async (req, res, next) => {
   const { id, leagueId } = req.params;
 
   try {
-    const validUser = await userExists({ _id: id });
+    const validUser = await userExists(id);
 
     if (!validUser) return next(new ResourceExistsError("User"));
 

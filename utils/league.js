@@ -2,7 +2,7 @@ const League = require("../models/league");
 const { userExists } = require("./user");
 
 const validateUserId = async (id) => {
-  return await userExists({ _id: id });
+  return await userExists(id);
 };
 
 const validateName = async (name) => {
