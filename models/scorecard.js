@@ -2,10 +2,15 @@ const mongoose = require("mongoose");
 const Score = require("../models/score");
 
 const scorecardSchema = new mongoose.Schema({
-  date: { type: Date, required: true },
-  createdDate: { type: Date, default: Date.now() },
+  date: { type: Date, default: Date.now },
   scores: [Score.schema],
-  complete: { type: Boolean, default: false },
+  players: [{ type: mongoose.Types.ObjectId, required: true, ref: "User" }],
+  status: {
+    type: String,
+    default: "pending",
+    enum: ["pending", "complete", "incomplete"],
+  },
+  layout: { type: mongoose.Types.ObjectId, required: true, ref: "Layout" },
 });
 
 const Scorecard = mongoose.model("Scorecard", scorecardSchema);

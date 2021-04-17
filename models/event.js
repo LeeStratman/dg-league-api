@@ -7,12 +7,17 @@ const eventSchema = new mongoose.Schema({
   description: { type: String },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
-  layout: { type: mongoose.Types.ObjectId, ref: "Layout" },
+  layout: { type: mongoose.Types.ObjectId, required: true, ref: "Layout" },
   published: { type: Boolean, default: false },
-  status: { type: String }, // pending, complete, cancelled
-  scorecards: [Scorecard.schema], // Raw scores submitted by players.
-  results: [Result.schema], // Calculated total scores. (when status === 'complete')
-  calculatedDate: { type: Date }, // last time scores were calculated.
+  status: {
+    type: String,
+    default: "pending",
+    enum: ["pending", "complete", "cancelled"],
+  },
+  results: [Result.schema],
+  calculatedDate: { type: Date },
+  leagueId: { type: mongoose.Types.ObjectId, required: true, ref: "League" },
+  scorecards: [Scorecard.schema], // Denormalize on purpose, so user can't modify scorecard.  They can delete from scorecard collection, but it remains here.
 });
 
 const Event = mongoose.model("Event", eventSchema);
