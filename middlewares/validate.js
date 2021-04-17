@@ -1,9 +1,13 @@
 const Joi = require("joi");
+const User = require("../models/user");
 const {
   BadRequestError,
-  UserExistsError,
+  ResourceExistsError,
   UniquePropertyError,
+  ServerError,
+  UserExistsError,
 } = require("../utils/error");
+
 const { validateUserId, validateName } = require("../utils/league");
 
 const validateUser = (req, res, next) => {
@@ -22,11 +26,27 @@ const validateUser = (req, res, next) => {
   next();
 };
 
+const userEmailExists = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+
+    if (user) return next(new UserExistsError("User"));
+
+    next();
+  } catch (err) {
+    return next(new ServerError(err));
+  }
+};
+
 const validateLeague = (req, res, next) => {
   const schema = Joi.object({
     public: Joi.boolean(),
     name: Joi.string().min(3).required(),
     organizer: Joi.string().min(24).required(),
+    city: Joi.string().min(2),
+    state: Joi.string().max(2).min(2),
+    description: Joi.string().min(3),
   });
   const { error } = schema.validate(req.body);
 
@@ -42,7 +62,7 @@ const validateLeagueOrganizer = async (req, res, next) => {
 
   const valid = await validateUserId(organizer);
 
-  if (!valid) next(new UserExistsError());
+  if (!valid) next(new ResourceExistsError("User"));
 
   next();
 };
@@ -64,4 +84,5 @@ module.exports = {
   validateLeague,
   validateLeagueOrganizer,
   validateLeagueName,
+  userEmailExists,
 };
