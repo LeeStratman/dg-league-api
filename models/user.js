@@ -36,8 +36,11 @@ userSchema.pre("save", async function preSave(next) {
 
 userSchema.methods.generateAuthToken = function () {
   return jwt.sign(
-    { _id: this._id, email: this.email },
-    config.get("authsecret")
+    { id: this._id, email: this.email },
+    config.get("authsecret"),
+    {
+      expiresIn: config.jwtExp,
+    }
   );
 };
 
