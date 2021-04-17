@@ -3,21 +3,24 @@ const jwt = require("jsonwebtoken");
 const config = require("config");
 const bcrypt = require("bcrypt");
 
-const userSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    minlength: 5,
-    trim: true,
-    lowercase: true,
-    unique: true,
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      minlength: 5,
+      trim: true,
+      lowercase: true,
+      unique: true,
+    },
+    password: { type: String, required: true, minlength: 3, trim: true },
+    firstName: { type: String, required: true, minlength: 1, trim: true },
+    lastName: { type: String, required: true, minlength: 1, trim: true },
+    registered: { type: Date, default: Date.now },
+    active: { type: Boolean, default: true },
   },
-  password: { type: String, required: true, minlength: 3, trim: true },
-  firstName: { type: String, required: true, minlength: 1, trim: true },
-  lastName: { type: String, required: true, minlength: 1, trim: true },
-  avatar: { type: String },
-  registered: { type: Date, default: Date.now },
-});
+  { timestamps: true }
+);
 
 userSchema.pre("save", async function preSave(next) {
   if (!this.isModified("password")) return next();
