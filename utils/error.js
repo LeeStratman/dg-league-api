@@ -33,10 +33,26 @@ class UserExistsError {
   }
 }
 
+class CredentialsError {
+  constructor() {
+    this.status = 401;
+    this.message = "Invalid credentials.";
+  }
+}
+
+class RequiredFieldsError {
+  constructor(message) {
+    this.status = 400;
+    this.message = message;
+  }
+}
+
 module.exports = {
   BadRequestError,
   ResourceExistsError,
   UniquePropertyError,
   ServerError,
   UserExistsError,
+  CredentialsError,
+  RequiredFieldsError,
 };

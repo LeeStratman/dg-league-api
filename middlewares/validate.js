@@ -28,6 +28,7 @@ const validateUser = (req, res, next) => {
 
 const userEmailExists = async (req, res, next) => {
   const { email } = req.body;
+
   try {
     const user = await User.findOne({ email });
 

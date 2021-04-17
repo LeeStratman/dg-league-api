@@ -7,4 +7,6 @@ router
   .route("/signup")
   .post([validateUser, userEmailExists], authController.signup);
 
+router.route("/signin").post(authController.signin);
+
 module.exports = router;
