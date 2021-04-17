@@ -29,6 +29,8 @@ const protect = async (req, res, next) => {
       .lean()
       .exec();
 
+    if (!user || !user.active) return next(new Error.AuthorizationError());
+
     user._id = user._id.toString();
 
     req.user = user;
