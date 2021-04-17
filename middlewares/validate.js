@@ -6,6 +6,7 @@ const {
   UniquePropertyError,
   ServerError,
   UserExistsError,
+  AuthorizationError,
 } = require("../utils/error");
 
 const { validateUserId, validateName } = require("../utils/league");
@@ -80,10 +81,23 @@ const validateLeagueName = async (req, res, next) => {
   next();
 };
 
+const userIdMatchesToken = (req, res, next) => {
+  const { id } = req.params;
+
+  if (!id) return next(new BadRequestError());
+
+  if (!req.user || !req.user._id) return next(new AuthorizationError());
+
+  if (id !== req.user._id) return next(new AuthorizationError());
+
+  return next();
+};
+
 module.exports = {
   validateUser,
   validateLeague,
   validateLeagueOrganizer,
   validateLeagueName,
   userEmailExists,
+  userIdMatchesToken,
 };

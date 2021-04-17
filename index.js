@@ -6,6 +6,7 @@ const users = require("./routes/users");
 const leagues = require("./routes/leagues");
 const courses = require("./routes/courses");
 const errorHandler = require("./middlewares/errorHandler");
+const { protect } = require("./middlewares/auth");
 
 const app = express();
 
@@ -14,8 +15,8 @@ connectDB();
 app.use(express.json());
 app.use(cors());
 app.use("/api/auth", auth);
-app.use("/api/users", users);
-app.use("/api/leagues", leagues);
+app.use("/api/users", protect, users);
+app.use("/api/leagues", protect, leagues);
 app.use("/api/courses", courses);
 app.use(errorHandler);
 

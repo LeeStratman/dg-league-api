@@ -29,6 +29,8 @@ const protect = async (req, res, next) => {
       .lean()
       .exec();
 
+    user._id = user._id.toString();
+
     req.user = user;
     next();
   } catch (err) {
