@@ -5,6 +5,7 @@ const auth = require("./routes/auth");
 const users = require("./routes/users");
 const leagues = require("./routes/leagues");
 const courses = require("./routes/courses");
+const events = require("./routes/events");
 const errorHandler = require("./middlewares/errorHandler");
 const { protect } = require("./middlewares/auth");
 
@@ -17,6 +18,7 @@ app.use(cors());
 app.use("/api/auth", auth);
 app.use("/api/users", protect, users);
 app.use("/api/leagues", protect, leagues);
+app.use("/api/events", protect, events);
 app.use("/api/courses", courses);
 app.use(errorHandler);
 
