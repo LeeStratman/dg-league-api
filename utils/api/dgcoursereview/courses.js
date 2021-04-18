@@ -8,7 +8,7 @@ const searchCourses = async (mode, query) => {
 };
 
 const getCourse = async (id) => {
-  const mode = "crseinfo";
+  const mode = "holeinfo";
 
   return axios.get(
     `${config.dgcoursereviewURL}?key=${config.dgcoursereviewkey}&mode=${mode}&id=${id}&sig=${config.dgcoursereviewSig[mode]}`
