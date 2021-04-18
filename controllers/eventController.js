@@ -1,6 +1,7 @@
 const Event = require("../models/event");
 const League = require("../models/league");
 const Error = require("../utils/error");
+const { getCourse } = require("../utils/api/dgcoursereview/courses");
 
 const createOne = async (req, res, next) => {
   const { leagueId } = req.body;
@@ -22,6 +23,26 @@ const createOne = async (req, res, next) => {
   }
 };
 
+const getOne = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const event = await Event.findById(id).lean().exec();
+
+    if (!event) return next(new Error.ResourceExistsError("Event"));
+
+    if (event.layout.courseId) {
+      const { data } = await getCourse(event.layout.courseId);
+      event.layout.course = data;
+    }
+
+    res.status(200).send(event);
+  } catch (err) {
+    next(new Error.ServerError(err));
+  }
+};
+
 module.exports = {
   createOne,
+  getOne,
 };
