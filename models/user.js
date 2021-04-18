@@ -16,7 +16,6 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, minlength: 3, trim: true },
     firstName: { type: String, required: true, minlength: 1, trim: true },
     lastName: { type: String, required: true, minlength: 1, trim: true },
-    registered: { type: Date, default: Date.now },
     active: { type: Boolean, default: true },
   },
   { timestamps: true }
