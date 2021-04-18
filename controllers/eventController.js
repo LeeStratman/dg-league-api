@@ -2,6 +2,7 @@ const Event = require("../models/event");
 const League = require("../models/league");
 const Error = require("../utils/error");
 const { getCourse } = require("../utils/api/dgcoursereview/courses");
+const Scorecard = require("../models/scorecard");
 
 const createOne = async (req, res, next) => {
   const { leagueId } = req.body;
@@ -95,9 +96,97 @@ const deleteOne = async (req, res, next) => {
   }
 };
 
+const createScorecard = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const scorecard = new Scorecard({ ...req.body });
+
+    const event = await Event.findOneAndUpdate(
+      { _id: id },
+      { $push: { scorecards: scorecard } },
+      { new: true }
+    ).exec();
+
+    if (!event) {
+      return next(new Error.ResourceExistsError("Event"));
+    }
+
+    res.status(201).send(event);
+  } catch (err) {
+    return next(new Error.ServerError(err));
+  }
+};
+
+const getScorecard = async (req, res, next) => {
+  const { id, scorecardId } = req.params;
+
+  try {
+    const event = await Event.findById(id);
+
+    if (!event) {
+      return next(new Error.ResourceExistsError("Event"));
+    }
+
+    const scorecard = event.scorecards.id(scorecardId);
+
+    if (!scorecard) return next(new Error.ResourceExistsError("Scorecard"));
+
+    return res.status(200).send(scorecard);
+  } catch (err) {
+    return next(new Error.ServerError(err));
+  }
+};
+
+const updateScorecard = async (req, res, next) => {
+  const { id, scorecardId } = req.params;
+
+  try {
+    let event = await Event.findById(id);
+
+    if (!event) {
+      return next(new Error.ResourceExistsError("Event"));
+    }
+
+    const scorecard = event.scorecards.id(scorecardId);
+
+    if (!scorecard) return next(new Error.ResourceExistsError("Scorecard"));
+
+    Object.keys(req.body).forEach((key) => {
+      scorecard[key] = req.body[key];
+    });
+
+    event = await event.save();
+
+    return res.status(200).send(event);
+  } catch (err) {
+    return next(new Error.ServerError(err));
+  }
+};
+
+const deleteScorecard = async (req, res, next) => {
+  const { id, scorecardId } = req.params;
+
+  try {
+    const event = await Event.findOneAndUpdate(
+      { _id: id },
+      { $pull: { scorecards: { _id: scorecardId } } },
+      { new: true }
+    ).exec();
+
+    res.status(200).send(event);
+  } catch (err) {
+    return next(new Error.ServerError(err));
+  }
+};
+
 module.exports = {
   createOne,
   getOne,
   updateOne,
   deleteOne,
+  createScorecard,
+  getScorecard,
+  updateScorecard,
+  deleteScorecard,
 };
