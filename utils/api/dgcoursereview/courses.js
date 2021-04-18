@@ -1,63 +1,21 @@
 const axios = require("axios");
 const config = require("config");
-const {
-  BadRequestError,
-  ResourceExistsError,
-  ServerError,
-} = require("../../error");
 
-const searchCourses = async (req, res, next) => {
-  let mode;
-  let query;
-
-  if (req.query.name) {
-    query = `name=${req.query.name}`;
-    mode = "findname";
-  }
-
-  try {
-    const response = await axios.get(
-      `${config.dgcoursereviewURL}?key=${config.dgcoursereviewkey}&mode=${mode}&${query}&sig=${config.dgcoursereviewSig[mode]}`
-    );
-
-    if (response.status !== 200) {
-      return next(new BadRequestError());
-    }
-
-    if (!response.data) {
-      return next(new ResourceExistsError("Course"));
-    }
-
-    return res.status(200).send(response.data);
-  } catch (err) {
-    return next(new ServerError(err));
-  }
+const searchCourses = async (mode, query) => {
+  return axios.get(
+    `${config.dgcoursereviewURL}?key=${config.dgcoursereviewkey}&mode=${mode}&${query}&sig=${config.dgcoursereviewSig[mode]}`
+  );
 };
 
-const getCourseInfo = async (req, res, next) => {
-  const { id } = req.params;
+const getCourse = async (id) => {
   const mode = "crseinfo";
 
-  try {
-    const response = await axios.get(
-      `${config.dgcoursereviewURL}?key=${config.dgcoursereviewkey}&mode=${mode}&id=${id}&sig=${config.dgcoursereviewSig[mode]}`
-    );
-
-    if (response.status !== 200) {
-      return next(new BadRequestError());
-    }
-
-    if (!response.data) {
-      return next(new ResourceExistsError("Course"));
-    }
-
-    return res.status(200).send(response.data);
-  } catch (err) {
-    return next(new ServerError(err));
-  }
+  return axios.get(
+    `${config.dgcoursereviewURL}?key=${config.dgcoursereviewkey}&mode=${mode}&id=${id}&sig=${config.dgcoursereviewSig[mode]}`
+  );
 };
 
 module.exports = {
-  getCourseInfo,
+  getCourse,
   searchCourses,
 };
