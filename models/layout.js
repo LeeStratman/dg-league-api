@@ -4,7 +4,7 @@ const layoutSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String },
   courseId: { type: String, required: true },
-  tee_pos: { Type: Number },
+  tee_pos: { type: Number, default: 1 },
 });
 
 const Layout = mongoose.model("Layout", layoutSchema);
