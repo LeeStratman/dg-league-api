@@ -4,4 +4,10 @@ const router = Router();
 
 router.route("/").post(eventController.createOne);
 
+router
+  .route("/:id")
+  .get(eventController.getOne)
+  .put(eventController.updateOne)
+  .delete(eventController.deleteOne);
+
 module.exports = router;

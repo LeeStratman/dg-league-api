@@ -33,7 +33,16 @@ const getOne = async (req, res, next) => {
 
     if (event.layout.courseId) {
       const { data } = await getCourse(event.layout.courseId);
-      event.layout.course = data;
+      event.layout.course = data[0];
+      event.layout.holes = data
+        .filter((hole) => hole.hole_num)
+        .map((hole) => {
+          return {
+            num: hole.hole_num,
+            length: hole[`tee_${event.layout.tee_pos}_len`],
+            par: hole[`tee_${event.layout.tee_pos}_par`],
+          };
+        });
     }
 
     res.status(200).send(event);
@@ -42,7 +51,53 @@ const getOne = async (req, res, next) => {
   }
 };
 
+const updateOne = async (req, res, next) => {
+  const { id } = req.params;
+  const { _id } = req.user;
+
+  try {
+    let event = await Event.findById(id).populate("leagueId").exec();
+
+    if (!event) return next(new Error.ResourceExistsError("Event"));
+
+    if (event.leagueId.organizer.toString() !== _id)
+      return next(new Error.AuthorizationError());
+
+    Object.keys(req.body).forEach((key) => {
+      event[key] = req.body[key];
+    });
+
+    event = await event.save();
+
+    res.status(200).send(event);
+  } catch (err) {
+    next(new Error.ServerError(err));
+  }
+};
+
+const deleteOne = async (req, res, next) => {
+  const { id } = req.params;
+  const { _id } = req.user;
+
+  try {
+    let event = await Event.findById(id).populate("leagueId").exec();
+
+    if (!event) return next(new Error.ResourceExistsError("Event"));
+
+    if (event.leagueId.organizer.toString() !== _id)
+      return next(new Error.AuthorizationError());
+
+    event = await event.remove();
+
+    res.status(200).send(event._id);
+  } catch (err) {
+    next(new Error.ServerError(err));
+  }
+};
+
 module.exports = {
   createOne,
   getOne,
+  updateOne,
+  deleteOne,
 };
