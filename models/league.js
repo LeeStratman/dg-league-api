@@ -1,20 +1,18 @@
 const mongoose = require("mongoose");
 
-const leagueSchema = new mongoose.Schema({
-  public: { type: Boolean, default: true },
-  name: { type: String, required: true, minlength: 3, unique: true },
-  organizer: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
-  players: [{ type: mongoose.Types.ObjectId, ref: "User" }],
-  courses: [{ type: String }],
-  regDeadline: { type: Date },
-  createdDate: { type: Date, default: Date.now() },
-  city: { type: String },
-  state: { type: String },
-  zip: { type: String },
-  description: { type: String },
-  startDate: { type: Date },
-  endDate: { type: Date },
-});
+const leagueSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, minlength: 3, unique: true },
+    description: { type: String },
+    organizer: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
+    players: [{ type: mongoose.Types.ObjectId, ref: "User" }],
+    courses: [{ type: String }],
+    city: { type: String },
+    state: { type: String },
+    zip: { type: String },
+  },
+  { timestamps: true }
+);
 
 const League = mongoose.model("League", leagueSchema);
 

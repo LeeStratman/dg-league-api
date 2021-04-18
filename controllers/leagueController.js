@@ -1,48 +1,136 @@
 const League = require("../models/league");
 const Event = require("../models/event");
-const Scorecard = require("../models/scorecard");
-const Score = require("../models/score");
-const Result = require("../models/result");
-const crudController = require("../utils/crud");
-const { validateUserId } = require("../utils/league");
-const { ResourceExistsError, ServerError } = require("../utils/error");
 
-const leagueCRUD = crudController(League);
+const {
+  ResourceExistsError,
+  ServerError,
+  AuthorizationError,
+} = require("../utils/error");
 
-const getLeagues = async (req, res, next) => {
-  let leagues;
-  if (req.query.name) {
-    leagues = await League.find({
-      public: true,
-      name: { $regex: req.query.name.trim(), $options: "i" },
-    })
-      .select("-users")
-      .populate("organizer", "-_id -__v -password -registered");
-  } else {
-    leagues = leagueCRUD.getAll(req, res, next);
+const getMany = async (req, res, next) => {
+  try {
+    const leagues = await League.find({})
+      .sort("-createdDate")
+      .limit(30)
+      .select("-users -__v")
+      .populate("organizer", "-_id -__v -password -registered")
+      .exec();
+
+    return res.status(200).send(leagues);
+  } catch (err) {
+    return next(new ServerError(err));
   }
-
-  return res.status(200).send(leagues);
 };
 
-const addUserToLeague = async (req, res, next) => {
-  const { id, userId } = req.params;
+const createOne = async (req, res, next) => {
+  try {
+    const league = await League.create({
+      ...req.body,
+      organizer: req.user._id,
+    });
+
+    res.status(201).send(league);
+  } catch (err) {
+    next(new ServerError(err));
+  }
+};
+
+const search = async (req, res, next) => {
+  const { name } = req.query;
+  const { location } = req.query;
+  const query = {};
+
+  if (name) {
+    query.name = { $regex: name.trim(), $options: "i" };
+  }
+
+  if (location) {
+    query.zip = { $regex: location.trim(), $options: "i" };
+  }
 
   try {
-    const valid = await validateUserId(userId);
+    const leagues = await League.find(query)
+      .limit(30)
+      .select("-players -__v")
+      .populate("organizer", "-_id -__v -password");
 
-    if (!valid) return next(new ResourceExistsError("User"));
+    res.status(200).send({ leagues });
+  } catch (err) {
+    next(new ServerError(err));
+  }
+};
 
+const getOne = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const league = await League.findById(id)
+      .select("-__v")
+      .populate("organizer", "-__v -password -registered")
+      .exec();
+
+    if (!league) return next(new ResourceExistsError("League"));
+
+    return res.status(200).send(league);
+  } catch (err) {
+    return next(new ServerError(err));
+  }
+};
+
+const updateOne = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    let league = await League.findById(id);
+
+    if (!league) return next(new ResourceExistsError("League"));
+
+    if (req.user._id !== league.organizer.toString())
+      return next(new AuthorizationError());
+
+    Object.keys(req.body).forEach((key) => {
+      league[key] = req.body[key];
+    });
+
+    league = await league.save();
+
+    res.status(200).send(league);
+  } catch (err) {
+    return next(new ServerError(err));
+  }
+};
+
+const deleteOne = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    let league = await League.findById(id);
+
+    if (!league) return next(new ResourceExistsError("League"));
+
+    if (req.user._id !== league.organizer.toString())
+      return next(new AuthorizationError());
+
+    league = await league.remove();
+
+    res.status(200).send(league);
+  } catch (err) {
+    return next(new ServerError(err));
+  }
+};
+
+const joinLeague = async (req, res, next) => {
+  const { id } = req.params;
+  const { _id } = req.user;
+
+  try {
     const league = await League.findById(id);
 
     if (!league) return next(new ResourceExistsError("League"));
 
-    if (league.users.includes(userId))
+    if (league.players.includes(_id))
       return res
         .status(400)
         .send({ error: "User already belongs to a league." });
 
-    league.users.push(userId);
+    league.players.push(_id);
 
     const updatedLeague = await league.save();
 
@@ -52,224 +140,43 @@ const addUserToLeague = async (req, res, next) => {
   }
 };
 
-const updateLayout = async (req, res, next) => {
-  const { id, layoutId } = req.params;
-
-  try {
-    let league = await League.findById(id);
-
-    if (!league) return next(new ResourceExistsError("League"));
-
-    const layout = league.layouts.id(layoutId);
-
-    Object.keys(req.body).forEach((key) => {
-      layout[key] = req.body[key];
-    });
-
-    league = await league.save();
-
-    return res.status(200).send(league);
-  } catch (err) {
-    next(new ServerError(err));
-  }
-};
-
-const createEvent = async (req, res, next) => {
+const getEvents = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    let league = await League.findById(id);
+    const events = await Event.find({ leagueId: id }).lean().exec();
 
-    if (!league) return next(new ResourceExistsError("League"));
-
-    const event = new Event({ ...req.body });
-
-    league.events.push(event);
-
-    league = await league.save();
-
-    res.status(200).send(league);
+    res.status(200).send(events);
   } catch (err) {
     next(new ServerError(err));
   }
 };
 
-const createScorecard = async (req, res, next) => {
-  const { id, eventId } = req.params;
+const getPlayers = async (req, res, next) => {
+  const { id } = req.params;
 
   try {
-    let league = await League.findById(id);
+    const league = await League.findById(id)
+      .populate("players", "-password -active -__v")
+      .lean()
+      .exec();
 
     if (!league) return next(new ResourceExistsError("League"));
 
-    const event = league.events.id(eventId);
-
-    if (!event) return next(new ResourceExistsError("Event"));
-
-    const scorecard = new Scorecard({ ...req.body });
-
-    event.scorecards.push(scorecard);
-
-    league = await league.save();
-
-    res.status(200).send(league);
-  } catch (err) {
-    next(new ServerError(err));
-  }
-};
-
-const addScore = async (req, res, next) => {
-  const { id, eventId, scorecardId } = req.params;
-
-  try {
-    let league = await League.findById(id);
-
-    if (!league) return next(new ResourceExistsError("League"));
-
-    const event = league.events.id(eventId);
-
-    if (!event) return next(new ResourceExistsError("Event"));
-
-    const scorecard = event.scorecards.id(scorecardId);
-
-    if (!scorecard) return next(new ResourceExistsError("Scorecard"));
-
-    const score = new Score({ ...req.body });
-
-    scorecard.scores.push(score);
-
-    league = await league.save();
-
-    res.status(200).send(league);
-  } catch (err) {
-    next(new ServerError(err));
-  }
-};
-
-const updateScore = async (req, res, next) => {
-  const { id, eventId, scorecardId, scoreId } = req.params;
-
-  try {
-    let league = await League.findById(id);
-
-    if (!league) return next(new ResourceExistsError("League"));
-
-    const event = league.events.id(eventId);
-
-    if (!event) return next(new ResourceExistsError("Event"));
-
-    const scorecard = event.scorecards.id(scorecardId);
-
-    if (!scorecard) return next(new ResourceExistsError("Scorecard"));
-
-    const score = scorecard.scores.id(scoreId);
-
-    if (!score) return next(new ResourceExistsError("Score"));
-
-    Object.keys(req.body).forEach((key) => {
-      score[key] = req.body[key];
-    });
-
-    league = await league.save();
-
-    res.status(200).send(league);
-  } catch (err) {
-    next(new ServerError(err));
-  }
-};
-
-const deleteScore = async (req, res, next) => {
-  const { id, eventId, scorecardId, scoreId } = req.params;
-
-  try {
-    let league = await League.findById(id);
-
-    if (!league) return next(new ResourceExistsError("League"));
-
-    const event = league.events.id(eventId);
-
-    if (!event) return next(new ResourceExistsError("Event"));
-
-    const scorecard = event.scorecards.id(scorecardId);
-
-    if (!scorecard) return next(new ResourceExistsError("Scorecard"));
-
-    const score = scorecard.scores.id(scoreId);
-
-    if (!score) return next(new ResourceExistsError("Score"));
-
-    score.remove();
-
-    league = await league.save();
-
-    res.status(200).send(league);
-  } catch (err) {
-    next(new ServerError(err));
-  }
-};
-
-const getEvent = async (req, res, next) => {
-  const { id, eventId } = req.params;
-
-  try {
-    const league = await League.findById(id);
-
-    if (!league) return next(new ResourceExistsError("League"));
-
-    const event = league.events.id(eventId);
-
-    if (!event) return next(new ResourceExistsError("Event"));
-
-    res.status(200).send(event);
-  } catch (err) {
-    next(new ServerError(err));
-  }
-};
-
-const calculateResults = async (req, res, next) => {
-  const { id, eventId } = req.params;
-
-  try {
-    let league = await League.findById(id);
-
-    if (!league) return next(new ResourceExistsError("League"));
-
-    const event = league.events.id(eventId);
-
-    if (!event) return next(new ResourceExistsError("Event"));
-
-    const results = event.scorecards
-      .map((scorecard) => scorecard.scores)
-      .flat()
-      .map((score) => {
-        return new Result({
-          player: score.player,
-          result: score.holes.reduce((acc, hole) => acc + hole),
-        });
-      });
-
-    event.results = results;
-
-    event.calculatedDate = Date.now();
-
-    league = await league.save();
-
-    res.status(200).send(league);
+    res.status(200).send(league.players);
   } catch (err) {
     next(new ServerError(err));
   }
 };
 
 module.exports = {
-  ...leagueCRUD,
-  getLeagues,
-  addUserToLeague,
-  updateLayout,
-  createEvent,
-  createScorecard,
-  addScore,
-  updateScore,
-  deleteScore,
-  calculateResults,
-  getEvent,
+  getMany,
+  createOne,
+  search,
+  getOne,
+  updateOne,
+  deleteOne,
+  joinLeague,
+  getEvents,
+  getPlayers,
 };

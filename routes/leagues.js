@@ -1,49 +1,23 @@
 const leagueController = require("../controllers/leagueController");
-const {
-  validateLeague,
-  validateLeagueOrganizer,
-  validateLeagueName,
-} = require("../middlewares/validate");
 const { Router } = require("express");
 const router = Router();
 
 router
   .route("/")
-  .get(leagueController.getLeagues)
-  .post(
-    [validateLeague, validateLeagueOrganizer, validateLeagueName],
-    leagueController.createOne
-  );
+  .get(leagueController.getMany)
+  .post(leagueController.createOne);
+
+router.route("/search").get(leagueController.search);
 
 router
   .route("/:id")
   .get(leagueController.getOne)
   .put(leagueController.updateOne)
-  .delete(leagueController.removeOne);
+  .delete(leagueController.deleteOne);
 
-router.route("/:id/users/:userId").put(leagueController.addUserToLeague);
+router.route("/:id/join").post(leagueController.joinLeague);
 
-router.route("/:id/layouts/:layoutId").put(leagueController.updateLayout);
-
-router.route("/:id/events").post(leagueController.createEvent);
-
-router.route("/:id/events/:eventId").get(leagueController.getEvent);
-
-router
-  .route("/:id/events/:eventId/scorecard")
-  .post(leagueController.createScorecard);
-
-router
-  .route("/:id/events/:eventId/scorecard/:scorecardId")
-  .post(leagueController.addScore);
-
-router
-  .route("/:id/events/:eventId/scorecard/:scorecardId/score/:scoreId")
-  .put(leagueController.updateScore)
-  .delete(leagueController.deleteScore);
-
-router
-  .route("/:id/events/:eventId/results")
-  .post(leagueController.calculateResults);
+router.route("/:id/events").get(leagueController.getEvents);
+router.route("/:id/players").get(leagueController.getPlayers);
 
 module.exports = router;

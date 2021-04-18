@@ -4,12 +4,11 @@ const { BadRequestError, UniquePropertyError } = require("../../utils/error");
 
 const validateLeague = (req, res, next) => {
   const schema = Joi.object({
-    public: Joi.boolean(),
     name: Joi.string().min(3).required(),
+    description: Joi.string().min(3),
     organizer: Joi.string().min(24).required(),
     city: Joi.string().min(2),
     state: Joi.string().max(2).min(2),
-    description: Joi.string().min(3),
   });
   const { error } = schema.validate(req.body);
 
