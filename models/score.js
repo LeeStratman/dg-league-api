@@ -5,8 +5,6 @@ const scoreSchema = new mongoose.Schema({
   holes: [{ type: Number, required: true }],
 });
 
-// Virtualize total!
-
 const Score = mongoose.model("Score", scoreSchema);
 
 module.exports = Score;
