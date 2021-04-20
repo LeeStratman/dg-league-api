@@ -54,7 +54,7 @@ const search = async (req, res, next) => {
       .select("-players -__v")
       .populate("organizer", "-_id -__v -password");
 
-    res.status(200).send({ leagues });
+    res.status(200).send(leagues);
   } catch (err) {
     next(new ServerError(err));
   }
