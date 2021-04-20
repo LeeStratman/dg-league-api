@@ -36,7 +36,7 @@ class UserExistsError {
 class CredentialsError {
   constructor() {
     this.status = 401;
-    this.message = "Invalid credentials.";
+    this.message = "Invalid username or password.";
   }
 }
 

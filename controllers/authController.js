@@ -2,8 +2,6 @@ const User = require("../models/user");
 const {
   CredentialsError,
   ServerError,
-  ResourceExistsError,
-  RequiredFieldError,
   UserExistsError,
 } = require("../utils/error");
 
@@ -30,12 +28,12 @@ const signup = async (req, res, next) => {
 const signin = async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return next(new RequiredFieldError("Email and password are required."));
+    return next(new CredentialsError());
   }
 
   const user = await User.findOne({ email }).exec();
 
-  if (!user) return next(new ResourceExistsError("User"));
+  if (!user) return next(new CredentialsError());
 
   try {
     const match = await user.checkPassword(password);
