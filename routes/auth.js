@@ -4,7 +4,10 @@ const {
   validateUser,
   userEmailExists,
 } = require("../middlewares/validation/user");
+const { protect } = require("../middlewares/auth");
 const router = Router();
+
+router.route("/").post(protect, authController.authorize);
 
 router
   .route("/signup")

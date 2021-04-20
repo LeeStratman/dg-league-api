@@ -4,10 +4,19 @@ const {
   ServerError,
   ResourceExistsError,
   RequiredFieldError,
+  UserExistsError,
 } = require("../utils/error");
+
+const authorize = async (req, res) => {
+  return res.status(200).end();
+};
 
 const signup = async (req, res, next) => {
   try {
+    const user = await User.find({ email: req.body.email });
+
+    if (user) return next(new UserExistsError());
+
     const newUser = await User.create(req.body);
 
     const token = newUser.generateAuthToken();
@@ -35,10 +44,10 @@ const signin = async (req, res, next) => {
 
     const token = user.generateAuthToken();
 
-    res.status(201).send({ token });
+    res.status(200).send({ token });
   } catch (err) {
     return next(new ServerError(err));
   }
 };
 
-module.exports = { signup, signin };
+module.exports = { authorize, signup, signin };
