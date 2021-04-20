@@ -11,9 +11,9 @@ const authorize = async (req, res) => {
 
 const signup = async (req, res, next) => {
   try {
-    const user = await User.find({ email: req.body.email });
+    const user = await User.find({ email: req.body.email }).lean().exec();
 
-    if (user) return next(new UserExistsError());
+    if (user.length > 0) return next(new UserExistsError());
 
     const newUser = await User.create(req.body);
 
