@@ -17,6 +17,9 @@ router
 
 router.route("/:id/join").post(leagueController.joinLeague);
 
+router.route("/:id/add-course").post(leagueController.addCourse);
+router.route("/:id/remove-course").post(leagueController.removeCourse);
+
 router.route("/:id/events").get(leagueController.getEvents);
 router.route("/:id/players").get(leagueController.getPlayers);
 

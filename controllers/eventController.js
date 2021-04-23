@@ -1,8 +1,8 @@
 const Event = require("../models/event");
 const League = require("../models/league");
 const Error = require("../utils/error");
-const { getCourse } = require("../utils/api/dgcoursereview/courses");
 const Scorecard = require("../models/scorecard");
+const Layout = require("../models/layout");
 
 const createOne = async (req, res, next) => {
   const { leagueId } = req.body;
@@ -32,20 +32,6 @@ const getOne = async (req, res, next) => {
 
     if (!event) return next(new Error.ResourceExistsError("Event"));
 
-    if (event.layout.courseId) {
-      const { data } = await getCourse(event.layout.courseId);
-      event.layout.course = data[0];
-      event.layout.holes = data
-        .filter((hole) => hole.hole_num)
-        .map((hole) => {
-          return {
-            num: hole.hole_num,
-            length: hole[`tee_${event.layout.tee_pos}_len`],
-            par: hole[`tee_${event.layout.tee_pos}_par`],
-          };
-        });
-    }
-
     res.status(200).send(event);
   } catch (err) {
     next(new Error.ServerError(err));
@@ -63,6 +49,11 @@ const updateOne = async (req, res, next) => {
 
     if (event.leagueId.organizer.toString() !== _id)
       return next(new Error.AuthorizationError());
+
+    if (req.body.layout) {
+      const layout = new Layout(req.body.layout);
+      req.body.layout = layout;
+    }
 
     Object.keys(req.body).forEach((key) => {
       event[key] = req.body[key];

@@ -8,7 +8,7 @@ const eventSchema = new mongoose.Schema({
   description: { type: String },
   date: { type: Date, required: true },
   leagueId: { type: mongoose.Types.ObjectId, required: true, ref: "League" },
-  layout: { type: Layout.schema, required: true },
+  layout: { type: Layout.schema },
   results: [Result.schema],
   scorecards: [Scorecard.schema],
 });
