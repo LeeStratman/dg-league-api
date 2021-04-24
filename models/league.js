@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Course = require("./course");
 
 const leagueSchema = new mongoose.Schema(
   {
@@ -6,7 +7,7 @@ const leagueSchema = new mongoose.Schema(
     description: { type: String },
     organizer: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
     players: [{ type: mongoose.Types.ObjectId, ref: "User" }],
-    courses: [{ type: String }],
+    courses: [{ type: Course.schema }],
     city: { type: String },
     state: { type: String },
     zip: { type: String },

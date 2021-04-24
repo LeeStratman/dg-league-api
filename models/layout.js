@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
+const Course = require("./course");
 
 const layoutSchema = new mongoose.Schema({
-  name: { type: String, required: true },
   description: { type: String },
-  courseId: { type: String, required: true },
-  tee_pos: { type: Number, default: 1 },
+  numHoles: { type: Number, default: 18 },
+  course: { type: Course.schema, required: true },
 });
 
 const Layout = mongoose.model("Layout", layoutSchema);
