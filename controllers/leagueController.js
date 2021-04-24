@@ -1,6 +1,5 @@
 const League = require("../models/league");
 const Event = require("../models/event");
-const { getCourse } = require("../utils/api/dgcoursereview/courses");
 
 const {
   ResourceExistsError,
@@ -8,6 +7,7 @@ const {
   AuthorizationError,
   BadRequestError,
 } = require("../utils/error");
+const Course = require("../models/course");
 
 const getMany = async (req, res, next) => {
   try {
@@ -72,36 +72,6 @@ const getOne = async (req, res, next) => {
       .exec();
 
     if (!league) return next(new ResourceExistsError("League"));
-
-    const promises = league.courses.map(async (courseId) => {
-      const course = await getCourse(courseId).then((course) => course.data);
-
-      const courseInfo = course[0];
-      const holes = course.filter((hole) => hole.hole_num);
-      const { tee_1_clr, tee_2_clr, tee_3_clr, tee_4_clr } = courseInfo;
-      const tees = [];
-
-      if (tee_1_clr) tees.push(1);
-      if (tee_2_clr) tees.push(2);
-      if (tee_3_clr) tees.push(3);
-      if (tee_4_clr) tees.push(4);
-      const layouts = [];
-
-      for (let i = 0; i < tees.length; i++) {
-        const layout = holes.map((hole) => {
-          return {
-            length: hole[`tee_${tees[i]}_len`],
-            par: hole[`tee_${tees[i]}_par`],
-          };
-        });
-        layouts.push(layout);
-      }
-      return { ...courseInfo, layouts };
-    });
-
-    const courses = await Promise.all(promises);
-
-    league.courses = courses;
 
     return res.status(200).send(league);
   } catch (err) {
@@ -209,9 +179,11 @@ const addCourse = async (req, res, next) => {
   if (!course) return next(new BadRequestError());
 
   try {
+    const newCourse = new Course(course);
+
     const league = await League.findByIdAndUpdate(
       id,
-      { $push: { courses: course } },
+      { $push: { courses: newCourse } },
       { new: true }
     ).exec();
 
@@ -232,7 +204,7 @@ const removeCourse = async (req, res, next) => {
   try {
     const league = await League.findByIdAndUpdate(
       id,
-      { $pull: { courses: course } },
+      { $pull: { courses: { _id: course._id } } },
       { new: true }
     ).exec();
 
