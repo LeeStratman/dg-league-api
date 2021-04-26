@@ -3,6 +3,7 @@ const League = require("../models/league");
 const Error = require("../utils/error");
 const Scorecard = require("../models/scorecard");
 const Layout = require("../models/layout");
+const Score = require("../models/score");
 
 const createOne = async (req, res, next) => {
   const { leagueId } = req.body;
@@ -90,7 +91,21 @@ const deleteOne = async (req, res, next) => {
 const createScorecard = async (req, res, next) => {
   const { id } = req.params;
 
+  if (!req.body.players || !req.body.numHoles) {
+    return next(new Error.BadRequestError());
+  }
+
   try {
+    if (!req.body.scores) {
+      req.body.scores = [];
+
+      req.body.players.map((player) => {
+        req.body.scores.push(
+          new Score({ player, holes: new Array(req.body.numHoles).fill(0) })
+        );
+      });
+    }
+
     const scorecard = new Scorecard({ ...req.body });
 
     const event = await Event.findOneAndUpdate(
@@ -103,7 +118,7 @@ const createScorecard = async (req, res, next) => {
       return next(new Error.ResourceExistsError("Event"));
     }
 
-    res.status(201).send(event);
+    res.status(201).send(scorecard);
   } catch (err) {
     return next(new Error.ServerError(err));
   }
@@ -113,7 +128,9 @@ const getScorecard = async (req, res, next) => {
   const { id, scorecardId } = req.params;
 
   try {
-    const event = await Event.findById(id);
+    const event = await Event.findById(id)
+      .populate("scorecards.players")
+      .exec();
 
     if (!event) {
       return next(new Error.ResourceExistsError("Event"));
@@ -123,7 +140,7 @@ const getScorecard = async (req, res, next) => {
 
     if (!scorecard) return next(new Error.ResourceExistsError("Scorecard"));
 
-    return res.status(200).send(scorecard);
+    return res.status(200).send({ ...scorecard.toJSON(), event });
   } catch (err) {
     return next(new Error.ServerError(err));
   }
