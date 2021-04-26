@@ -8,9 +8,9 @@ const leagueSchema = new mongoose.Schema(
     organizer: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
     players: [{ type: mongoose.Types.ObjectId, ref: "User" }],
     courses: [{ type: Course.schema }],
-    city: { type: String },
-    state: { type: String },
-    zip: { type: String },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    zip: { type: String, required: true },
   },
   { timestamps: true }
 );
