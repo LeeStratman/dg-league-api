@@ -8,6 +8,7 @@ const validateScorecard = (req, res, next) => {
     status: Joi.string()
       .default("pending")
       .valid("pending", "complete", "incomplete"),
+    numHoles: Joi.number(),
   });
   const { error } = schema.validate(req.body);
 
