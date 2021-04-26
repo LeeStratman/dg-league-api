@@ -29,7 +29,10 @@ const getOne = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const event = await Event.findById(id).lean().exec();
+    const event = await Event.findById(id)
+      .populate("scorecards.scores.player", "-__v -password -registered")
+      .lean()
+      .exec();
 
     if (!event) return next(new Error.ResourceExistsError("Event"));
 
