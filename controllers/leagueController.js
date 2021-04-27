@@ -204,7 +204,7 @@ const removeCourse = async (req, res, next) => {
   try {
     const league = await League.findByIdAndUpdate(
       id,
-      { $pull: { courses: { _id: course._id } } },
+      { $pull: { courses: { _id: course } } },
       { new: true }
     ).exec();
 
