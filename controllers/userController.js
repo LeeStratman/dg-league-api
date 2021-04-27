@@ -2,7 +2,11 @@ const User = require("../models/user");
 const League = require("../models/league");
 const crudController = require("../utils/crud");
 const { ResourceExistsError, ServerError } = require("../utils/error");
-const { getUpcomingLeagueEvents } = require("../utils/events");
+const {
+  getUpcomingLeagueEvents,
+  getTodaysLeagueEvents,
+  getRecentLeagueEvents,
+} = require("../utils/events");
 
 const getMe = async (req, res, next) => {
   const { user } = req;
@@ -16,11 +20,22 @@ const getMe = async (req, res, next) => {
 
     const leagueIds = leagues.map((league) => league._id);
 
+    const todayEvents = await getTodaysLeagueEvents(leagueIds);
+
     const upcomingEvents = await getUpcomingLeagueEvents(leagueIds);
+
+    const recentEvents = await getRecentLeagueEvents(leagueIds);
 
     res
       .status(200)
-      .send({ ...user, leagues, organizedLeagues, upcomingEvents });
+      .send({
+        ...user,
+        leagues,
+        organizedLeagues,
+        upcomingEvents,
+        todayEvents,
+        recentEvents,
+      });
   } catch (err) {
     return next(new ServerError(err));
   }
