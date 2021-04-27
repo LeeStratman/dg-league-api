@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Event = require("../models/event");
 const League = require("../models/league");
 const Error = require("../utils/error");
@@ -149,6 +150,60 @@ const getScorecard = async (req, res, next) => {
   }
 };
 
+const getUserScorecard = async (req, res, next) => {
+  const { id } = req.params;
+  const { _id } = req.user;
+
+  try {
+    let scorecard = await Event.aggregate([
+      {
+        $unwind: {
+          path: "$scorecards",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          $and: [
+            {
+              _id: mongoose.Types.ObjectId(id),
+            },
+            {
+              "scorecards.players": mongoose.Types.ObjectId(_id),
+            },
+          ],
+        },
+      },
+      {
+        $replaceWith: {
+          scorecard: "$scorecards",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "scorecard.players",
+          foreignField: "_id",
+          as: "scorecard.players",
+        },
+      },
+      {
+        $project: {
+          "scorecard.players.password": 0,
+        },
+      },
+    ]);
+
+    if (scorecard.length > 0) {
+      scorecard = scorecard[0];
+    }
+
+    return res.status(200).send(scorecard);
+  } catch (err) {
+    return next(new Error.ServerError(err));
+  }
+};
+
 const updateScorecard = async (req, res, next) => {
   const { id, scorecardId } = req.params;
 
@@ -166,6 +221,30 @@ const updateScorecard = async (req, res, next) => {
     Object.keys(req.body).forEach((key) => {
       scorecard[key] = req.body[key];
     });
+
+    event = await event.save();
+
+    return res.status(200).send(event);
+  } catch (err) {
+    return next(new Error.ServerError(err));
+  }
+};
+
+const completeScorecard = async (req, res, next) => {
+  const { id, scorecardId } = req.params;
+
+  try {
+    let event = await Event.findById(id);
+
+    if (!event) {
+      return next(new Error.ResourceExistsError("Event"));
+    }
+
+    const scorecard = event.scorecards.id(scorecardId);
+
+    if (!scorecard) return next(new Error.ResourceExistsError("Scorecard"));
+
+    scorecard.status = "complete";
 
     event = await event.save();
 
@@ -200,4 +279,6 @@ module.exports = {
   getScorecard,
   updateScorecard,
   deleteScorecard,
+  getUserScorecard,
+  completeScorecard,
 };

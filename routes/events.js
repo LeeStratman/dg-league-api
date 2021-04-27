@@ -10,6 +10,10 @@ router
   .post(validateScorecard, eventController.createScorecard);
 
 router
+  .route("/:id/scorecard/:scorecardId/complete")
+  .post(eventController.completeScorecard);
+
+router
   .route("/:id/scorecard/:scorecardId")
   .get(eventController.getScorecard)
   .put(eventController.updateScorecard)
