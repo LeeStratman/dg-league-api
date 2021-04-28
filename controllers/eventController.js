@@ -5,6 +5,7 @@ const Error = require("../utils/error");
 const Scorecard = require("../models/scorecard");
 const Layout = require("../models/layout");
 const Score = require("../models/score");
+const { calculateEventResults } = require("../utils/results");
 
 const createOne = async (req, res, next) => {
   const { leagueId } = req.body;
@@ -234,7 +235,7 @@ const completeScorecard = async (req, res, next) => {
   const { id, scorecardId } = req.params;
 
   try {
-    let event = await Event.findById(id);
+    let event = await Event.findById(id).populate("scorecards.scores.player");
 
     if (!event) {
       return next(new Error.ResourceExistsError("Event"));
@@ -244,7 +245,10 @@ const completeScorecard = async (req, res, next) => {
 
     if (!scorecard) return next(new Error.ResourceExistsError("Scorecard"));
 
+    if (scorecard.status === "complete") return res.status(200).send(event);
+
     scorecard.status = "complete";
+    event.results = calculateEventResults(event.scorecards);
 
     event = await event.save();
 
